@@ -14,6 +14,7 @@ use Controllers\SlideController;
 use Controllers\ContentController;
 use Controllers\TeacherController;
 use Controllers\StudentController;
+use Controllers\ImportController;
 
 
 
@@ -60,3 +61,6 @@ Router::put('/api/admin/students/{id}', [StudentController::class, 'update'], $a
 Router::delete('/api/admin/students/{id}', [StudentController::class, 'destroy'], $admin);
 Router::post('/api/admin/students/{id}/reset-password', [StudentController::class, 'resetPassword'], $admin);
 Router::get('/api/admin/students/{id}/schedule', [StudentController::class, 'schedule'], $admin);
+// Excel import (admin only)
+Router::get('/api/admin/import/{type}/template', [ImportController::class, 'template'], $admin);
+Router::post('/api/admin/import/{type}', [ImportController::class, 'import'], $admin);

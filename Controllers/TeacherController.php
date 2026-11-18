@@ -16,6 +16,7 @@ use Models\User;
 use PDOException;
 use Throwable;
 use Helpers\Account;
+use Helpers\Rules;
 
 final class TeacherController
 {
@@ -42,11 +43,7 @@ final class TeacherController
 
         public static function store(Request $request): void
     {
-        $data = Validator::validate($request->body(), [
-            'fullname' => ['required', 'max:100'],
-            'national_code' => ['required', 'national_code'],
-            'skill' => ['required', 'max:100'],
-        ]);
+        $data = Validator::validate($request->body(), Rules::TEACHER_STORE);
 
         $nationalCode = (string) $data['national_code'];
 

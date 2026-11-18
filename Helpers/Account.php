@@ -17,7 +17,7 @@ final class Account
         }
     }
 
-    public static function register(string $role, array $data): int
+        public static function register(string $role, array $data, ?int $hashCost = null): int
     {
         $nationalCode = (string) $data['national_code'];
 
@@ -25,7 +25,7 @@ final class Account
             return User::create([
                 'username' => $nationalCode,
                 'national_code' => $nationalCode,
-                'password_hash' => self::defaultPasswordHash($nationalCode),
+                'password_hash' => self::defaultPasswordHash($nationalCode, $hashCost),
                 'fullname' => $data['fullname'],
                 'phone' => $data['phone'] ?? null,
                 'address' => $data['address'] ?? null,
@@ -52,12 +52,16 @@ final class Account
             ]);
         }
 
-        User::updatePassword((int) $user['user_id'], $role, self::defaultPasswordHash($nationalCode));
+        User::updatePassword((int) $user['user_id'], $role, self::defaultPasswordHash($nationalCode, null));
     }
 
-    private static function defaultPasswordHash(string $nationalCode): string
+        private static function defaultPasswordHash(string $nationalCode, ?int $cost): string
     {
-        return password_hash($nationalCode, PASSWORD_DEFAULT);
+        if ($cost === null) {
+            return password_hash($nationalCode, PASSWORD_DEFAULT);
+        }
+
+        return password_hash($nationalCode, PASSWORD_BCRYPT, ['cost' => $cost]);
     }
 
     private static function duplicate(): HttpException

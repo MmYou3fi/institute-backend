@@ -26,7 +26,15 @@ CREATE TABLE IF NOT EXISTS users(
     KEY idx_users_role (role)
 ) ENGINE=InnoDB;
 
--- 3. classes (user_id is the teacher)
+-- 3. class_location (the place of a class, e.g. room 107)
+CREATE TABLE IF NOT EXISTS class_location (
+    l_id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+    location VARCHAR(100) NOT NULL,
+    PRIMARY KEY(l_id),
+    UNIQUE KEY uq_class_location_location (location)
+) ENGINE=InnoDB;
+
+-- 4. classes (user_id is the teacher)
 CREATE TABLE IF NOT EXISTS classes (
     class_id INT UNSIGNED NOT NULL AUTO_INCREMENT,
     title VARCHAR(150) NOT NULL,
@@ -35,18 +43,24 @@ CREATE TABLE IF NOT EXISTS classes (
     s_date DATE NOT NULL,
     e_date DATE NOT NULL,
     user_id INT UNSIGNED NOT NULL,
+    l_id INT UNSIGNED NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY(class_id),
     UNIQUE KEY uq_classes_number (class_num),
     KEY idx_classes_user (user_id),
+    KEY idx_classes_location (l_id),
     CONSTRAINT fk_classes_user FOREIGN KEY (user_id)
     REFERENCES users (user_id)
+    ON DELETE RESTRICT
+    ON UPDATE CASCADE,
+    CONSTRAINT fk_classes_location FOREIGN KEY (l_id)
+    REFERENCES class_location (l_id)
     ON DELETE RESTRICT
     ON UPDATE CASCADE,
     CONSTRAINT chk_classes_dates CHECK (e_date >= s_date)
 ) ENGINE=InnoDB;
 
--- 4. class_student (user_id is the student)
+-- 5. class_student (user_id is the student)
 CREATE TABLE IF NOT EXISTS class_student (
     c_id INT UNSIGNED NOT NULL AUTO_INCREMENT,
     class_id INT UNSIGNED NOT NULL,
@@ -64,7 +78,7 @@ CREATE TABLE IF NOT EXISTS class_student (
     ON UPDATE CASCADE
 ) ENGINE=InnoDB;
 
--- 5. class_time (day: 0 = saturday ... 6 = friday)
+-- 6. class_time (day: 0 = saturday ... 6 = friday)
 CREATE TABLE IF NOT EXISTS class_time (
     t_id INT UNSIGNED NOT NULL AUTO_INCREMENT,
     class_id INT UNSIGNED NOT NULL,
@@ -81,7 +95,7 @@ CREATE TABLE IF NOT EXISTS class_time (
     CONSTRAINT chk_class_time_range CHECK (e_clock > s_clock)
 ) ENGINE=InnoDB;
 
--- 6. class_session (one row per session of a class)
+-- 7. class_session (one row per session of a class)
 CREATE TABLE IF NOT EXISTS class_session (
     session_id INT UNSIGNED NOT NULL AUTO_INCREMENT,
     class_id INT UNSIGNED NOT NULL,
@@ -97,7 +111,7 @@ CREATE TABLE IF NOT EXISTS class_session (
     ON UPDATE CASCADE
 ) ENGINE=InnoDB;
 
--- 7. landing page: info (single row , admin only edits it)
+-- 8. landing page: info (single row , admin only edits it)
 CREATE TABLE IF NOT EXISTS info (
     info_id INT UNSIGNED NOT NULL AUTO_INCREMENT,
     about TEXT NULL,
@@ -107,7 +121,7 @@ CREATE TABLE IF NOT EXISTS info (
     PRIMARY KEY(info_id)
 ) ENGINE=InnoDB;
 
--- 8. landing page: slide_shows
+-- 9. landing page: slide_shows
 CREATE TABLE IF NOT EXISTS slide_shows (
     slide_id INT UNSIGNED NOT NULL AUTO_INCREMENT,
     title VARCHAR(150) NOT NULL,
@@ -116,7 +130,7 @@ CREATE TABLE IF NOT EXISTS slide_shows (
     PRIMARY KEY(slide_id)
 ) ENGINE=InnoDB;
 
--- 9. landing page: new_content
+-- 10. landing page: new_content
 CREATE TABLE IF NOT EXISTS new_content (
     content_id INT UNSIGNED NOT NULL AUTO_INCREMENT,
     title VARCHAR(150) NOT NULL,
@@ -124,4 +138,14 @@ CREATE TABLE IF NOT EXISTS new_content (
     img_url VARCHAR(255) NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY(content_id)
+) ENGINE=InnoDB;
+
+-- 11. landing page: professors
+CREATE TABLE IF NOT EXISTS professors (
+    professor_id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+    name VARCHAR(100) NOT NULL,
+    skill VARCHAR(100) NULL,
+    about TEXT NULL,
+    img_url VARCHAR(255) NULL,
+    PRIMARY KEY(professor_id)
 ) ENGINE=InnoDB;

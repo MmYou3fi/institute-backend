@@ -13,6 +13,7 @@ use Helpers\Pagination;
 use Helpers\Schedule;
 use Helpers\Validator;
 use Models\User;
+use Helpers\Rules;
 
 final class StudentController
 {
@@ -39,12 +40,7 @@ final class StudentController
 
         public static function store(Request $request): void
     {
-        $data = Validator::validate($request->body(), [
-            'fullname' => ['required', 'max:100'],
-            'national_code' => ['required', 'national_code'],
-            'phone' => ['required', 'mobile'],
-            'address' => ['max:255'],
-        ]);
+        $data = Validator::validate($request->body(), Rules::STUDENT_STORE);
 
         $nationalCode = (string) $data['national_code'];
 

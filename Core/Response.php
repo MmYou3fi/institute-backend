@@ -23,6 +23,17 @@ final class Response
         ], $status);
     }
 
+        public static function download(string $content, string $filename, string $contentType): never
+    {
+        http_response_code(200);
+        header('Content-Type: ' . $contentType);
+        header('Content-Disposition: attachment; filename="' . $filename . '"');
+        header('Content-Length: ' . strlen($content));
+        header('Cache-Control: no-store');
+        echo $content;
+        exit;
+    }
+
     private static function send(array $payload, int $status): never
     {
         http_response_code($status);
