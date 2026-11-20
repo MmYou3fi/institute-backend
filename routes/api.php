@@ -15,6 +15,8 @@ use Controllers\ContentController;
 use Controllers\TeacherController;
 use Controllers\StudentController;
 use Controllers\ImportController;
+use Controllers\ProfessorController;
+use Controllers\LocationController;
 
 
 
@@ -64,3 +66,13 @@ Router::get('/api/admin/students/{id}/schedule', [StudentController::class, 'sch
 // Excel import (admin only)
 Router::get('/api/admin/import/{type}/template', [ImportController::class, 'template'], $admin);
 Router::post('/api/admin/import/{type}', [ImportController::class, 'import'], $admin);
+// Professors on the landing page (admin only)
+Router::get('/api/admin/professors', [ProfessorController::class, 'index'], $admin);
+Router::post('/api/admin/professors', [ProfessorController::class, 'store'], $admin);
+Router::post('/api/admin/professors/{id}', [ProfessorController::class, 'update'], $admin);
+Router::delete('/api/admin/professors/{id}', [ProfessorController::class, 'destroy'], $admin);
+// Class locations (admin only)
+Router::get('/api/admin/locations', [LocationController::class, 'index'], $admin);
+Router::post('/api/admin/locations', [LocationController::class, 'store'], $admin);
+Router::put('/api/admin/locations/{id}', [LocationController::class, 'update'], $admin);
+Router::delete('/api/admin/locations/{id}', [LocationController::class, 'destroy'], $admin);

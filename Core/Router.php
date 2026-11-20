@@ -7,23 +7,23 @@ namespace Core;
 class Router {
     private static array $routes = [];
 
-    public static function get(string $path, $handler, array $middlewares = []): void {
+    public static function get(string $path, callable $handler, array $middlewares = []): void {
         self::add('GET', $path, $handler, $middlewares);
     }
 
-    public static function post(string $path, $handler, array $middlewares = []): void {
+    public static function post(string $path, callable $handler, array $middlewares = []): void {
         self::add('POST', $path, $handler, $middlewares);
     }
 
-    public static function put(string $path, $handler, array $middlewares = []): void {
+    public static function put(string $path, callable $handler, array $middlewares = []): void {
         self::add('PUT', $path, $handler, $middlewares);
     }
 
-    public static function delete(string $path, $handler, array $middlewares = []): void {
+    public static function delete(string $path, callable $handler, array $middlewares = []): void {
         self::add('DELETE', $path, $handler, $middlewares);
     }
 
-    private static function add(string $method, string $path, $handler, array $middlewares): void {
+    private static function add(string $method, string $path, callable $handler, array $middlewares): void {
         // استانداردسازی مسیر (حذف اسلش اضافه در انتهای مسیر)
         $path = rtrim($path, '/');
         self::$routes[] = [

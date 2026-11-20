@@ -25,15 +25,19 @@ final class LandingController
             ->query(
                 'SELECT content_id, title, description, img_url, created_at
                  FROM new_content
-                 ORDER BY created_at DESC, content_id DESC
+                    ORDER BY created_at DESC, content_id DESC
                  LIMIT 20'
-            )
+            );
+
+                    $professors = $pdo
+            ->query('SELECT professor_id, name, skill, about, img_url FROM professors ORDER BY professor_id')
             ->fetchAll();
 
-        Response::success([
+                Response::success([
             'info' => $info === false ? null : $info,
             'slides' => $slides,
             'contents' => $contents,
+            'professors' => $professors,
         ], 'اطلاعات صفحه‌ی اصلی');
     }
 }

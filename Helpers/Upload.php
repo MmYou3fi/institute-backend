@@ -13,8 +13,8 @@ final class Upload
 {
     private const MAX_SIZE = 2 * 1024 * 1024;
 
-    private const FOLDERS = ['slides', 'contents', 'users'];
-
+    private const FOLDERS = ['slides', 'contents', 'users', 'professors'];
+    
     private const ALLOWED_TYPES = [
         'image/jpeg' => 'jpg',
         'image/png' => 'png',

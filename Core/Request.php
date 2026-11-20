@@ -67,8 +67,17 @@ final class Request
             return $this->body = $_POST;
         }
 
-        $raw = file_get_contents('php://input');
+$raw = file_get_contents('php://input');
 
+if ($raw === false || trim($raw) === '') {
+    return $this->body = [];
+}
+
+try {
+    $decoded = json_decode($raw, true, 512, JSON_THROW_ON_ERROR);
+} catch (JsonException) {
+    throw new HttpException('بدنه‌ی درخواست JSON معتبر نیست', 400);
+}
         if ($raw === false || trim($raw) === '') {
             return $this->body = [];
         }
