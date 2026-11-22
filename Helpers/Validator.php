@@ -7,6 +7,7 @@ namespace Helpers;
 use Core\Database;
 use Core\HttpException;
 use InvalidArgumentException;
+use DateTimeImmutable;
 
 final class Validator
 {
@@ -71,6 +72,9 @@ final class Validator
             'unique' => self::exists((string) $param, $value) ? 'این مقدار قبلاً ثبت شده است' : null,
             'national_code' => self::isNationalCode((string) $value) ? null : 'کدملی نامعتبر است',
             'mobile' => preg_match('/^09\d{9}$/', (string) $value) === 1 ? null : 'شماره موبایل نامعتبر است',
+                        'int_between' => self::isIntBetween($value, (string) $param) ? null : 'عدد صحیح معتبر نیست',
+            'date' => self::isDate((string) $value) ? null : 'تاریخ نامعتبر است (فرمت YYYY-MM-DD)',
+            'time' => preg_match('/^([01]\d|2[0-3]):[0-5]\d$/', (string) $value) === 1 ? null : 'ساعت نامعتبر است (فرمت HH:MM)',
             default => throw new InvalidArgumentException("Unknown validation rule: {$name}"),
         };
     }
@@ -126,5 +130,24 @@ final class Validator
         $statement->execute(['value' => (string) $value]);
 
         return (int) $statement->fetchColumn() > 0;
+    }
+
+        private static function isIntBetween(mixed $value, string $range): bool
+    {
+        if (is_bool($value) || preg_match('/^-?\d{1,18}$/', (string) $value) !== 1) {
+            return false;
+        }
+
+        [$min, $max] = array_pad(explode(',', $range, 2), 2, '0');
+        $number = (int) $value;
+
+        return $number >= (int) $min && $number <= (int) $max;
+    }
+
+    private static function isDate(string $value): bool
+    {
+        $date = DateTimeImmutable::createFromFormat('!Y-m-d', $value);
+
+        return $date !== false && $date->format('Y-m-d') === $value;
     }
 }

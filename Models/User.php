@@ -150,4 +150,39 @@ final class User
     }
 
         private const SEARCHABLE_COLUMNS = ['fullname', 'national_code', 'skill', 'phone'];
+
+            public static function existingIds(array $ids, string $role): array
+    {
+        if ($ids === []) {
+            return [];
+        }
+
+        $placeholders = implode(',', array_fill(0, count($ids), '?'));
+
+        $statement = Database::connection()->prepare(
+            'SELECT user_id FROM users WHERE role = ? AND user_id IN (' . $placeholders . ')'
+        );
+        $statement->execute([$role, ...$ids]);
+
+        return array_map('intval', $statement->fetchAll(PDO::FETCH_COLUMN));
+    }
+
+    public static function lockByIds(array $ids): void
+    {
+        $ids = array_values(array_unique($ids));
+
+        if ($ids === []) {
+            return;
+        }
+
+        sort($ids);
+
+        $placeholders = implode(',', array_fill(0, count($ids), '?'));
+
+        $statement = Database::connection()->prepare(
+            'SELECT user_id FROM users WHERE user_id IN (' . $placeholders . ') ORDER BY user_id FOR UPDATE'
+        );
+        $statement->execute($ids);
+        $statement->fetchAll();
+    }
 }

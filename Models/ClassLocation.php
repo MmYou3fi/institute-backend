@@ -67,4 +67,13 @@ final class ClassLocation
 
         return (int) $statement->fetchColumn();
     }
+
+        public static function lock(int $id): void
+    {
+        $statement = Database::connection()->prepare(
+            'SELECT l_id FROM class_location WHERE l_id = :l_id FOR UPDATE'
+        );
+        $statement->execute(['l_id' => $id]);
+        $statement->fetchAll();
+    }
 }

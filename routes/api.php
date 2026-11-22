@@ -17,6 +17,7 @@ use Controllers\StudentController;
 use Controllers\ImportController;
 use Controllers\ProfessorController;
 use Controllers\LocationController;
+use Controllers\ClassController;
 
 
 
@@ -76,3 +77,9 @@ Router::get('/api/admin/locations', [LocationController::class, 'index'], $admin
 Router::post('/api/admin/locations', [LocationController::class, 'store'], $admin);
 Router::put('/api/admin/locations/{id}', [LocationController::class, 'update'], $admin);
 Router::delete('/api/admin/locations/{id}', [LocationController::class, 'destroy'], $admin);
+// Class management (admin only)
+Router::post('/api/admin/classes', [ClassController::class, 'store'], $admin);
+Router::put('/api/admin/classes/{id}', [ClassController::class, 'update'], $admin);
+Router::get('/api/admin/classes', [ClassController::class, 'index'], $admin);
+Router::get('/api/admin/classes/{id}', [ClassController::class, 'show'], $admin);
+Router::delete('/api/admin/classes/{id}', [ClassController::class, 'destroy'], $admin);
