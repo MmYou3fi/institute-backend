@@ -224,4 +224,78 @@ final class Classroom
         $statement = Database::connection()->prepare('DELETE FROM classes WHERE class_id = :class_id');
         $statement->execute(['class_id' => $id]);
     }
+
+        public static function studentsOfTeacher(int $teacherId, string $search, int $limit, int $offset): array
+    {
+        $pdo = Database::connection();
+
+        $where = "u.role = 'student'
+                  AND EXISTS (
+                      SELECT 1
+                      FROM class_student cs
+                      JOIN classes c ON c.class_id = cs.class_id
+                      WHERE cs.user_id = u.user_id AND c.user_id = :teacher_id
+                  )";
+        $params = [':teacher_id' => $teacherId];
+
+        if ($search !== '') {
+            $like = '%' . addcslashes($search, '\\%_') . '%';
+
+            $where .= ' AND (u.fullname LIKE :search_name OR u.phone LIKE :search_phone)';
+            $params[':search_name'] = $like;
+            $params[':search_phone'] = $like;
+        }
+
+        $count = $pdo->prepare('SELECT COUNT(*) FROM users u WHERE ' . $where);
+        $count->execute($params);
+        $total = (int) $count->fetchColumn();
+
+        $statement = $pdo->prepare(
+            'SELECT u.user_id, u.fullname, u.phone FROM users u WHERE ' . $where
+            . ' ORDER BY u.fullname, u.user_id LIMIT :limit OFFSET :offset'
+        );
+
+        foreach ($params as $name => $value) {
+            $statement->bindValue($name, $value);
+        }
+
+        $statement->bindValue(':limit', $limit, PDO::PARAM_INT);
+        $statement->bindValue(':offset', $offset, PDO::PARAM_INT);
+        $statement->execute();
+
+        $students = $statement->fetchAll();
+
+        if ($students === []) {
+            return ['items' => [], 'total' => $total];
+        }
+
+        $ids = array_map(static fn (array $student): int => (int) $student['user_id'], $students);
+        $placeholders = implode(',', array_fill(0, count($ids), '?'));
+
+        $classes = $pdo->prepare(
+            'SELECT cs.user_id, c.class_id, c.title, c.class_num
+             FROM class_student cs
+             JOIN classes c ON c.class_id = cs.class_id
+             WHERE c.user_id = ? AND cs.user_id IN (' . $placeholders . ')
+             ORDER BY c.class_id'
+        );
+        $classes->execute([$teacherId, ...$ids]);
+
+        $byStudent = [];
+
+        foreach ($classes->fetchAll() as $row) {
+            $byStudent[(int) $row['user_id']][] = [
+                'class_id' => (int) $row['class_id'],
+                'title' => $row['title'],
+                'class_num' => $row['class_num'],
+            ];
+        }
+
+        $items = array_map(
+            static fn (array $student): array => $student + ['classes' => $byStudent[(int) $student['user_id']] ?? []],
+            $students
+        );
+
+        return ['items' => $items, 'total' => $total];
+    }
 }

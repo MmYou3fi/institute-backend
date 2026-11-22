@@ -14,6 +14,8 @@ spl_autoload_register(function (string $class) {
     }
 });
 
+date_default_timezone_set('Asia/Tehran');
+
 ini_set('display_errors', '0');
 error_reporting(E_ALL);
 

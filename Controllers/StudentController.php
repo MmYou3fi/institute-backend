@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Controllers;
 
-use Core\Database;
 use Core\HttpException;
 use Core\Request;
 use Core\Response;
@@ -13,6 +12,7 @@ use Helpers\Pagination;
 use Helpers\Schedule;
 use Helpers\Validator;
 use Models\User;
+use Models\Timetable;
 use Helpers\Rules;
 
 final class StudentController
@@ -101,29 +101,16 @@ final class StudentController
         Response::success(null, 'رمز زبان‌آموز به کدملی او بازنشانی شد');
     }
 
-    public static function schedule(Request $request, string $id): void
+        public static function schedule(Request $request, string $id): void
     {
         $studentId = Validator::id($id);
         $student = self::findOrFail($studentId);
-
-        $statement = Database::connection()->prepare(
-            "SELECT c.class_id, c.title, c.class_num, c.sessions, c.s_date, c.e_date,
-                    u.fullname AS teacher_name,
-                    t.day,
-                    TIME_FORMAT(t.s_clock, '%H:%i') AS s_clock,
-                    TIME_FORMAT(t.e_clock, '%H:%i') AS e_clock
-             FROM class_student cs
-             JOIN classes c ON c.class_id = cs.class_id
-             JOIN users u ON u.user_id = c.user_id
-             LEFT JOIN class_time t ON t.class_id = c.class_id
-             WHERE cs.user_id = :user_id
-             ORDER BY c.class_id, t.day, t.s_clock"
-        );
-        $statement->execute(['user_id' => $studentId]);
+        $date = Schedule::dateFilter($request);
 
         Response::success([
             'student' => $student,
-            'classes' => Schedule::groupByClass($statement->fetchAll()),
+            'date' => $date,
+            'days' => Schedule::groupByDay(Timetable::forStudent($studentId, $date)),
         ], 'برنامه‌ی زبان‌آموز');
     }
 }

@@ -18,6 +18,8 @@ use Controllers\ImportController;
 use Controllers\ProfessorController;
 use Controllers\LocationController;
 use Controllers\ClassController;
+use Controllers\ScheduleController;
+use Controllers\TeacherPanelController;
 
 
 
@@ -83,3 +85,13 @@ Router::put('/api/admin/classes/{id}', [ClassController::class, 'update'], $admi
 Router::get('/api/admin/classes', [ClassController::class, 'index'], $admin);
 Router::get('/api/admin/classes/{id}', [ClassController::class, 'show'], $admin);
 Router::delete('/api/admin/classes/{id}', [ClassController::class, 'destroy'], $admin);
+$studentAccess = [[AuthMiddleware::class, 'handle'], RoleMiddleware::allow('student')];
+$teacherAccess = [[AuthMiddleware::class, 'handle'], RoleMiddleware::allow('teacher')];
+
+// Student panel
+Router::get('/api/student/schedule', [ScheduleController::class, 'student'], $studentAccess);
+// Teacher panel
+Router::get('/api/teacher/schedule', [ScheduleController::class, 'teacher'], $teacherAccess);
+// Whole institute schedule (admin only)
+Router::get('/api/admin/schedule', [ScheduleController::class, 'admin'], $admin);
+Router::get('/api/teacher/students', [TeacherPanelController::class, 'students'], $teacherAccess);

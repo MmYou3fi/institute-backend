@@ -13,6 +13,7 @@ use Helpers\Schedule;
 use Helpers\Upload;
 use Helpers\Validator;
 use Models\User;
+use Models\Timetable;
 use PDOException;
 use Throwable;
 use Helpers\Account;
@@ -153,26 +154,16 @@ final class TeacherController
         Response::success(null, 'رمز مدرس به کدملی او بازنشانی شد');
     }
 
-           public static function schedule(Request $request, string $id): void
+               public static function schedule(Request $request, string $id): void
     {
         $teacherId = Validator::id($id);
         $teacher = self::findOrFail($teacherId);
-
-        $statement = Database::connection()->prepare(
-            "SELECT c.class_id, c.title, c.class_num, c.sessions, c.s_date, c.e_date,
-                    t.day,
-                    TIME_FORMAT(t.s_clock, '%H:%i') AS s_clock,
-                    TIME_FORMAT(t.e_clock, '%H:%i') AS e_clock
-             FROM classes c
-             LEFT JOIN class_time t ON t.class_id = c.class_id
-             WHERE c.user_id = :user_id
-             ORDER BY c.class_id, t.day, t.s_clock"
-        );
-        $statement->execute(['user_id' => $teacherId]);
+        $date = Schedule::dateFilter($request);
 
         Response::success([
             'teacher' => $teacher,
-            'classes' => Schedule::groupByClass($statement->fetchAll()),
+            'date' => $date,
+            'days' => Schedule::groupByDay(Timetable::forTeacher($teacherId, $date)),
         ], 'برنامه‌ی مدرس');
     }
 
